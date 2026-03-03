@@ -56,17 +56,20 @@ app.on("ready", () => {
 const menu: MenuItemConstructorOptions[] = [
   ...(isMac ? [{ role: "fileMenu" as const }] : []),
   {
-    label: "File",
-    submenu: [
-      {
-        label: "Exit",
-        accelerator: "cmdOrCtrl+Q",
-        click: () => {
-          app.quit();
-        },
-      },
-    ],
+    role: "fileMenu" as const,
   },
+  ...(isDev
+    ? [
+        {
+          label: "Developer",
+          submenu: [
+            { role: "reload" as const },
+            { role: "forceReload" as const },
+            { role: "toggleDevTools" as const },
+          ],
+        },
+      ]
+    : []),
 ];
 
 app.on("window-all-closed", () => {
