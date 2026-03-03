@@ -1,10 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  Menu,
-  MenuItemConstructorOptions,
-  globalShortcut,
-} from "electron";
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import path from "path";
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
@@ -34,30 +28,48 @@ function createMainWindow(): void {
   });
 }
 
+function createAboutWindow(): void {
+  const aboutWindow = new BrowserWindow({
+    width: 400,
+    height: 300,
+    title: "About",
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+    resizable: false,
+    icon: path.join(__dirname, "../assets/icon.png"),
+    backgroundColor: "#222222",
+  });
+  aboutWindow.loadFile(path.join(__dirname, "../src/about.html"));
+}
+
 app.on("ready", () => {
   createMainWindow();
-
   const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
-
-  globalShortcut.register("CmdOrCtrl+R", () => {
-    if (mainWindow) {
-      mainWindow.reload();
-    }
-  });
-
-  globalShortcut.register("CmdOrCtrl+Shift+I", () => {
-    if (mainWindow) {
-      mainWindow.webContents.openDevTools();
-    }
-  });
 });
 
 const menu: MenuItemConstructorOptions[] = [
-  ...(isMac ? [{ role: "fileMenu" as const }] : []),
+  ...(isMac
+    ? [
+        {
+          label: "About",
+          submenu: [{ label: "About Notesploy", click: createAboutWindow }],
+        },
+      ]
+    : []),
   {
     role: "fileMenu" as const,
   },
+  ...(!isMac
+    ? [
+        {
+          label: "Help",
+          submenu: [{ label: "About Notesploy", click: createAboutWindow }],
+        },
+      ]
+    : []),
   ...(isDev
     ? [
         {
