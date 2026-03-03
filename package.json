@@ -1,0 +1,18 @@
+{
+  "name": "notesploy-electron",
+  "version": "1.0.0",
+  "description": "Cross platform app for Notesploy",
+  "license": "MIT",
+  "author": "Notesploy",
+  "type": "commonjs",
+  "main": "dist/main.js",
+  "scripts": {
+    "compile": "tsc",
+    "start": "tsc && electron .",
+    "build": "tsc && electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^40.6.1",
+    "typescript": "^5.9.3"
+  }
+}
