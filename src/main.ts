@@ -24,6 +24,7 @@ function createMainWindow(): void {
     },
     resizable: isDev,
     icon: path.join(__dirname, "../assets/icon.png"),
+    backgroundColor: "#222222",
   });
 
   mainWindow.loadFile(path.join(__dirname, "../src/index.html"));
