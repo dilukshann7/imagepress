@@ -1,4 +1,10 @@
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItemConstructorOptions,
+  globalShortcut,
+} from "electron";
 import path from "path";
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
@@ -32,15 +38,28 @@ app.on("ready", () => {
 
   const mainMenu = Menu.buildFromTemplate(menu);
   Menu.setApplicationMenu(mainMenu);
+
+  globalShortcut.register("CmdOrCtrl+R", () => {
+    if (mainWindow) {
+      mainWindow.reload();
+    }
+  });
+
+  globalShortcut.register("CmdOrCtrl+Shift+I", () => {
+    if (mainWindow) {
+      mainWindow.webContents.openDevTools();
+    }
+  });
 });
 
 const menu: MenuItemConstructorOptions[] = [
+  ...(isMac ? [{ role: "fileMenu" as const }] : []),
   {
     label: "File",
     submenu: [
       {
         label: "Exit",
-        accelerator: isMac ? "Cmd+Q" : "Ctrl+Q",
+        accelerator: "cmdOrCtrl+Q",
         click: () => {
           app.quit();
         },
@@ -48,10 +67,6 @@ const menu: MenuItemConstructorOptions[] = [
     ],
   },
 ];
-
-if (isMac) {
-  menu.unshift({ role: "appMenu" });
-}
 
 app.on("window-all-closed", () => {
   if (!isMac) {
