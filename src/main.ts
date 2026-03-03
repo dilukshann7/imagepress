@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import path from "path";
 
 process.env.NODE_ENV = process.env.NODE_ENV || "development";
@@ -6,8 +6,10 @@ process.env.NODE_ENV = process.env.NODE_ENV || "development";
 const isDev = process.env.NODE_ENV === "development";
 const isMac = process.platform === "darwin";
 
+let mainWindow: BrowserWindow | null = null;
+
 function createMainWindow(): void {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -19,6 +21,46 @@ function createMainWindow(): void {
   });
 
   mainWindow.loadFile(path.join(__dirname, "../src/index.html"));
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
 
-app.on("ready", createMainWindow);
+app.on("ready", () => {
+  createMainWindow();
+
+  const mainMenu = Menu.buildFromTemplate(menu);
+  Menu.setApplicationMenu(mainMenu);
+});
+
+const menu: MenuItemConstructorOptions[] = [
+  {
+    label: "File",
+    submenu: [
+      {
+        label: "Exit",
+        accelerator: isMac ? "Cmd+Q" : "Ctrl+Q",
+        click: () => {
+          app.quit();
+        },
+      },
+    ],
+  },
+];
+
+if (isMac) {
+  menu.unshift({ role: "appMenu" });
+}
+
+app.on("window-all-closed", () => {
+  if (!isMac) {
+    app.quit();
+  }
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createMainWindow();
+  }
+});
