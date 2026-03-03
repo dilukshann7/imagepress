@@ -5,18 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
+      content="default-src 'self'; script-src 'self'; style-src 'self'"
     />
     <title>About Notesploy</title>
+    <link rel="stylesheet" href="../dist/about.css" />
   </head>
   <body>
-    <h1>Notesploy</h1>
-    <p class="version">Version 1.0.0</p>
-    <p class="description">Cross platform app for Notesploy</p>
-    <div class="divider"></div>
-    <div class="meta">
-      <div>Author <span>Notesploy</span></div>
-      <div>License <span>MIT</span></div>
-    </div>
+    <div id="root"></div>
+    <script src="../dist/about.js"></script>
   </body>
 </html>

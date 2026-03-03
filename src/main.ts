@@ -41,6 +41,7 @@ function createAboutWindow(): void {
     icon: path.join(__dirname, "../assets/icon.png"),
     backgroundColor: "#222222",
   });
+  aboutWindow.removeMenu();
   aboutWindow.loadFile(path.join(__dirname, "../src/about.html"));
 }
 
