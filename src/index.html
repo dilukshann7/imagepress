@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'"
+      content="default-src 'self'; script-src 'self'; style-src 'self'"
     />
     <title>Notesploy</title>
+    <link rel="stylesheet" href="../dist/renderer.css" />
   </head>
   <body>
-    <h1>Notesploy</h1>
-    <script src="../dist/index.js"></script>
+    <div id="root"></div>
+    <script src="../dist/renderer.js"></script>
   </body>
 </html>
