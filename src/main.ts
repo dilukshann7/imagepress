@@ -1,7 +1,8 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import path from "path";
+import dotenv from "dotenv";
 
-process.env.NODE_ENV = process.env.NODE_ENV || "development";
+dotenv.config();
 
 const isDev = process.env.NODE_ENV === "development";
 const isMac = process.platform === "darwin";
@@ -18,7 +19,6 @@ function createMainWindow(): void {
     },
     resizable: isDev,
     icon: path.join(__dirname, "../assets/icon.png"),
-    backgroundColor: "#222222",
   });
 
   mainWindow.loadFile(path.join(__dirname, "../src/index.html"));
@@ -41,6 +41,7 @@ function createAboutWindow(): void {
     icon: path.join(__dirname, "../assets/icon.png"),
     backgroundColor: "#222222",
   });
+
   aboutWindow.removeMenu();
   aboutWindow.loadFile(path.join(__dirname, "../src/about.html"));
 }
