@@ -481,6 +481,10 @@ const App: React.FC = () => {
                 className="w-full gap-2"
                 disabled={files.length === 0}
                 size="default"
+                ref={compressButtonRef}
+                onClick={() => {
+                  console.log();
+                }}
               >
                 <ZapIcon className="size-4" />
                 Compress{" "}
