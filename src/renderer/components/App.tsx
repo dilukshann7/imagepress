@@ -96,7 +96,85 @@ const StatusBadge = memo(function StatusBadge({
       Error
     </span>
   );
+});
+
+interface FileRowProps {
+  file: ImageFile;
+  onRemove: (id: string) => void;
 }
+
+const FileRow = memo(function FileRow({ file, onRemove }: FileRowProps) {
+  return (
+    <div className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 shadow-sm">
+      <div className="size-10 shrink-0 overflow-hidden rounded-md border bg-muted">
+        <img
+          src={file.preview}
+          alt={file.name}
+          className="size-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = "none";
+          }}
+        />
+      </div>
+
+      <div className="flex flex-1 min-w-0 flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate text-sm font-medium">{file.name}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          {file.status === "compressing" ? (
+            <Progress value={file.progress} className="h-1 flex-1" />
+          ) : (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{formatBytes(file.originalSize)}</span>
+              {file.compressedSize && (
+                <>
+                  <span>→</span>
+                  <span className="font-medium text-green-600 dark:text-green-400">
+                    {formatBytes(file.compressedSize)}
+                  </span>
+                  <span className="font-medium text-primary">
+                    ({savings(file.originalSize, file.compressedSize)} saved)
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="shrink-0 self-center">
+        <StatusBadge status={file.status} />
+      </div>
+
+      <div className="flex shrink-0 items-center gap-1">
+        {file.status === "done" && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="size-7">
+                <DownloadIcon className="size-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Download</TooltipContent>
+          </Tooltip>
+        )}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="size-7 text-muted-foreground hover:text-destructive"
+              onClick={() => onRemove(file.id)}
+            >
+              <Trash2Icon className="size-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Remove</TooltipContent>
+        </Tooltip>
+      </div>
+    </div>
+  );
+});
 
 const App: React.FC = () => {
   const [files, setFiles] = useState<ImageFile[]>([]);
