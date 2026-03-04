@@ -304,9 +304,7 @@ const App: React.FC = () => {
                       variant="outline"
                       size="sm"
                       className="gap-1.5"
-                      onClick={() => {
-                        fileInputRef.current?.click();
-                      }}
+                      onClick={() => fileInputRef.current?.click()}
                     >
                       <FolderOpenIcon className="size-3.5" />
                       Browse Files
