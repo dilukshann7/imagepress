@@ -151,7 +151,6 @@ const App: React.FC = () => {
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    // In a real app, read e.dataTransfer.files here
   }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -287,7 +286,6 @@ const App: React.FC = () => {
                     key={file.id}
                     className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 shadow-sm"
                   >
-                    {/* Thumbnail */}
                     <div className="size-10 shrink-0 overflow-hidden rounded-md border bg-muted">
                       <img
                         src={file.preview}
@@ -299,7 +297,6 @@ const App: React.FC = () => {
                       />
                     </div>
 
-                    {/* Info */}
                     <div className="flex flex-1 flex-col gap-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <span className="truncate text-sm font-medium">
