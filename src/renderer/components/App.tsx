@@ -95,51 +95,8 @@ function StatusBadge({ status }: { status: CompressionStatus }) {
   );
 }
 
-const MOCK_FILES: ImageFile[] = [
-  {
-    id: "1",
-    name: "hero-banner.png",
-    originalSize: 3_812_456,
-    compressedSize: 924_110,
-    preview:
-      "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=120&q=60",
-    status: "done",
-    progress: 100,
-  },
-  {
-    id: "2",
-    name: "product-photo.jpg",
-    originalSize: 2_104_800,
-    compressedSize: 680_230,
-    preview:
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120&q=60",
-    status: "done",
-    progress: 100,
-  },
-  {
-    id: "3",
-    name: "background-texture.webp",
-    originalSize: 5_340_000,
-    compressedSize: null,
-    preview:
-      "https://images.unsplash.com/photo-1557683316-973673baf926?w=120&q=60",
-    status: "compressing",
-    progress: 58,
-  },
-  {
-    id: "4",
-    name: "icon-set.png",
-    originalSize: 780_000,
-    compressedSize: null,
-    preview:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&q=60",
-    status: "idle",
-    progress: 0,
-  },
-];
-
 const App: React.FC = () => {
-  const [files, setFiles] = useState<ImageFile[]>(MOCK_FILES);
+  const [files, setFiles] = useState<ImageFile[]>([]);
   const [quality, setQuality] = useState(80);
   const [outputFormat, setOutputFormat] = useState("original");
   const [stripMeta, setStripMeta] = useState(true);
@@ -147,6 +104,8 @@ const App: React.FC = () => {
   const [maxWidth, setMaxWidth] = useState("1920");
   const [isDragOver, setIsDragOver] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const compressButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -159,6 +118,30 @@ const App: React.FC = () => {
   }, []);
 
   const handleDragLeave = useCallback(() => setIsDragOver(false), []);
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selected = e.target.files;
+      if (!selected || selected.length === 0) return;
+
+      const newItems: ImageFile[] = Array.from(selected)
+        .filter((file) => file.type.startsWith("image/"))
+        .map((file) => ({
+          id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
+          name: file.name,
+          originalSize: file.size,
+          compressedSize: null,
+          preview: URL.createObjectURL(file),
+          status: "idle",
+          progress: 0,
+        }));
+
+      setFiles((prev) => [...prev, ...newItems]);
+
+      e.target.value = "";
+    },
+    [],
+  );
 
   const removeFile = (id: string) =>
     setFiles((prev) => prev.filter((f) => f.id !== id));
@@ -222,16 +205,35 @@ const App: React.FC = () => {
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <FolderOpenIcon className="size-3.5" />
-                    Browse Files
-                  </Button>
+                  <form>
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      ref={fileInputRef}
+                      id="file-input"
+                      onChange={handleFileSelect}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => {
+                        fileInputRef.current?.click();
+                      }}
+                    >
+                      <FolderOpenIcon className="size-3.5" />
+                      Browse Files
+                    </Button>
+                  </form>
                 </EmptyContent>
               </Empty>
             </div>
 
             {files.length > 0 && (
-              <div className="flex flex-wrap items-center gap-4 rounded-lg border bg-muted/30 px-4 py-2.5 text-sm">
+              <div className="shrink-0 flex flex-wrap items-center gap-4 rounded-lg border bg-muted/30 px-4 py-2.5 text-sm">
                 <div className="flex flex-col">
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     Files
