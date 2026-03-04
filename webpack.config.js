@@ -24,6 +24,9 @@ module.exports = [
     },
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
+      alias: {
+        "@": path.resolve(__dirname, "."),
+      },
     },
     output: {
       filename: "renderer.js",
@@ -52,6 +55,9 @@ module.exports = [
     },
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
+      alias: {
+        "@": path.resolve(__dirname, "."),
+      },
     },
     output: {
       filename: "about.js",
