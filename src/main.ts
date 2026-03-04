@@ -57,7 +57,7 @@ const menu: MenuItemConstructorOptions[] = [
     ? [
         {
           label: "About",
-          submenu: [{ label: "About Notesploy", click: createAboutWindow }],
+          submenu: [{ label: "About ImagePress", click: createAboutWindow }],
         },
       ]
     : []),
@@ -68,7 +68,7 @@ const menu: MenuItemConstructorOptions[] = [
     ? [
         {
           label: "Help",
-          submenu: [{ label: "About Notesploy", click: createAboutWindow }],
+          submenu: [{ label: "About ImagePress", click: createAboutWindow }],
         },
       ]
     : []),

@@ -1,9 +1,9 @@
 {
-  "name": "notesploy-electron",
+  "name": "imagepress",
   "version": "1.0.0",
-  "description": "Cross platform app for Notesploy",
+  "description": "A powerful image compression tool built with Electron and React.",
   "license": "MIT",
-  "author": "Notesploy",
+  "author": "Dilukshan Niranjan",
   "type": "commonjs",
   "main": "dist/main.js",
   "scripts": {
