@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo, memo } from "react";
 import {
   ImageIcon,
   UploadCloudIcon,
@@ -65,7 +65,11 @@ function savings(original: number, compressed: number): string {
   return `${pct.toFixed(0)}%`;
 }
 
-function StatusBadge({ status }: { status: CompressionStatus }) {
+const StatusBadge = memo(function StatusBadge({
+  status,
+}: {
+  status: CompressionStatus;
+}) {
   if (status === "idle")
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
