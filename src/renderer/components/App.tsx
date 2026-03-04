@@ -12,7 +12,6 @@ import {
   SettingsIcon,
   DownloadCloudIcon,
 } from "lucide-react";
-
 import { Button } from "./ui/button";
 import { Slider } from "./ui/slider";
 import { Progress } from "./ui/progress";
@@ -166,9 +165,6 @@ const App: React.FC = () => {
             <span className="text-sm font-semibold tracking-tight">
               ImagePress
             </span>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-              BETA
-            </span>
           </div>
           <div className="flex items-center gap-2">
             {doneFiles.length > 0 && (
@@ -181,14 +177,14 @@ const App: React.FC = () => {
         </header>
 
         <div className="flex flex-1 overflow-hidden">
-          <main className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+          <main className="flex flex-1 flex-col gap-4 overflow-hidden p-4">
             <div
               ref={dropRef}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               className={cn(
-                "rounded-lg border-2 border-dashed transition-colors",
+                "shrink-0 rounded-lg border-2 border-dashed transition-colors",
                 isDragOver
                   ? "border-primary bg-primary/5"
                   : "border-border hover:border-primary/50",
@@ -271,7 +267,7 @@ const App: React.FC = () => {
                     </div>
                   </>
                 )}
-                <div className="ml-auto flex flex-1 flex-col gap-1 min-w-32">
+                <div className="ml-auto flex min-w-32 flex-1 flex-col gap-1">
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <span>Overall</span>
                     <span>{overallProgress}%</span>
@@ -281,103 +277,109 @@ const App: React.FC = () => {
               </div>
             )}
 
-            {files.length > 0 && (
-              <div className="flex flex-col gap-2">
-                {files.map((file) => (
-                  <div
-                    key={file.id}
-                    className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 shadow-sm"
-                  >
-                    <div className="size-10 shrink-0 overflow-hidden rounded-md border bg-muted">
-                      <img
-                        src={file.preview}
-                        alt={file.name}
-                        className="size-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = "none";
-                        }}
-                      />
-                    </div>
+            <div className="flex-1 overflow-y-auto">
+              {files.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  {files.map((file) => (
+                    <div
+                      key={file.id}
+                      className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2.5 shadow-sm"
+                    >
+                      <div className="size-10 shrink-0 overflow-hidden rounded-md border bg-muted">
+                        <img
+                          src={file.preview}
+                          alt={file.name}
+                          className="size-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display =
+                              "none";
+                          }}
+                        />
+                      </div>
 
-                    <div className="flex flex-1 flex-col gap-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="truncate text-sm font-medium">
-                          {file.name}
-                        </span>
+                      <div className="flex flex-1 min-w-0 flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-medium">
+                            {file.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {file.status === "compressing" ? (
+                            <Progress
+                              value={file.progress}
+                              className="h-1 flex-1"
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>{formatBytes(file.originalSize)}</span>
+                              {file.compressedSize && (
+                                <>
+                                  <span>→</span>
+                                  <span className="font-medium text-green-600 dark:text-green-400">
+                                    {formatBytes(file.compressedSize)}
+                                  </span>
+                                  <span className="font-medium text-primary">
+                                    (
+                                    {savings(
+                                      file.originalSize,
+                                      file.compressedSize,
+                                    )}{" "}
+                                    saved)
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="shrink-0 self-center">
                         <StatusBadge status={file.status} />
                       </div>
-                      <div className="flex items-center gap-2">
-                        {file.status === "compressing" ? (
-                          <Progress
-                            value={file.progress}
-                            className="h-1 flex-1"
-                          />
-                        ) : (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span>{formatBytes(file.originalSize)}</span>
-                            {file.compressedSize && (
-                              <>
-                                <span>→</span>
-                                <span className="text-green-600 dark:text-green-400 font-medium">
-                                  {formatBytes(file.compressedSize)}
-                                </span>
-                                <span className="text-primary font-medium">
-                                  (
-                                  {savings(
-                                    file.originalSize,
-                                    file.compressedSize,
-                                  )}{" "}
-                                  saved)
-                                </span>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="flex shrink-0 items-center gap-1">
-                      {file.status === "done" && (
+                      <div className="flex shrink-0 items-center gap-1">
+                        {file.status === "done" && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="size-7"
+                              >
+                                <DownloadIcon className="size-3.5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Download</TooltipContent>
+                          </Tooltip>
+                        )}
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="size-7"
+                              className="size-7 text-muted-foreground hover:text-destructive"
+                              onClick={() => removeFile(file.id)}
                             >
-                              <DownloadIcon className="size-3.5" />
+                              <Trash2Icon className="size-3.5" />
                             </Button>
                           </TooltipTrigger>
-                          <TooltipContent>Download</TooltipContent>
+                          <TooltipContent>Remove</TooltipContent>
                         </Tooltip>
-                      )}
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="size-7 text-muted-foreground hover:text-destructive"
-                            onClick={() => removeFile(file.id)}
-                          >
-                            <Trash2Icon className="size-3.5" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Remove</TooltipContent>
-                      </Tooltip>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {files.length === 0 && (
-              <div className="flex flex-1 items-center justify-center">
-                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                  <FileImageIcon className="size-10 opacity-20" />
-                  <p className="text-sm">No images added yet</p>
+                  ))}
                 </div>
-              </div>
-            )}
+              )}
+
+              {files.length === 0 && (
+                <div className="flex h-full items-center justify-center">
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <FileImageIcon className="size-10 opacity-20" />
+                    <p className="text-sm">No images added yet</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </main>
 
           <aside className="flex w-64 shrink-0 flex-col gap-0 overflow-y-auto border-l">
