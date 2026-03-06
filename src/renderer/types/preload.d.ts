@@ -14,6 +14,7 @@ interface ElectronAPI {
     filePaths: string[],
     quality: number,
   ) => Promise<CompressedImageResult[]>;
+  getPathForFile: (file: File) => string;
 }
 
 declare global {

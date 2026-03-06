@@ -1,7 +1,8 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, webUtils } from "electron";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   openFile: () => ipcRenderer.invoke("dialog:openFile"),
   compressImages: (filePaths: string[], quality: number) =>
     ipcRenderer.invoke("images:compress", filePaths, quality),
+  getPathForFile: (file: File) => webUtils.getPathForFile(file),
 });
