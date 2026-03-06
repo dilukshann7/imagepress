@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo, memo } from "react";
+import React, { useState, useRef, useCallback, useMemo, memo, useEffect } from "react";
 import {
   ImageIcon,
   UploadCloudIcon,
@@ -216,19 +216,83 @@ const App: React.FC = () => {
   const [maxWidth, setMaxWidth] = useState("1920");
   const [isDragOver, setIsDragOver] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
+  const dragDepthRef = useRef(0);
   const compressButtonRef = useRef<HTMLButtonElement>(null);
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-  };
+  useEffect(() => {
+    const preventNavigation = (e: DragEvent) => e.preventDefault();
+    document.addEventListener("dragover", preventNavigation);
+    document.addEventListener("drop", preventNavigation);
+    return () => {
+      document.removeEventListener("dragover", preventNavigation);
+      document.removeEventListener("drop", preventNavigation);
+    };
+  }, []);
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const addFiles = useCallback((selectedFiles: SelectedImageFile[]) => {
+    setFiles((prev) => {
+      const existingPaths = new Set(prev.map((file) => file.filePath));
+      const nextFiles = selectedFiles
+        .filter(({ filePath }) => !existingPaths.has(filePath))
+        .map(createImageFile);
+
+      return [...prev, ...nextFiles];
+    });
+  }, []);
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    if (!Array.from(e.dataTransfer.types).includes("Files")) {
+      return;
+    }
+
+    dragDepthRef.current += 1;
     setIsDragOver(true);
   };
 
-  const handleDragLeave = () => setIsDragOver(false);
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragDepthRef.current = 0;
+    setIsDragOver(false);
+
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    const selectedFiles = droppedFiles.flatMap((file) => {
+      if (!isSupportedImage(file.name, file.type)) {
+        return [];
+      }
+
+      const filePath = window.electronAPI.getPathForFile(file);
+      if (!filePath) return [];
+
+      return [{ filePath, originalSize: file.size }];
+    });
+
+    if (selectedFiles.length > 0) {
+      addFiles(selectedFiles);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!Array.from(e.dataTransfer.types).includes("Files")) {
+      return;
+    }
+
+    e.dataTransfer.dropEffect = "copy";
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (!Array.from(e.dataTransfer.types).includes("Files")) {
+      return;
+    }
+
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) {
+      setIsDragOver(false);
+    }
+  };
 
   const handleFileSelect = async () => {
     const selectedFiles = await window.electronAPI.openFile();
@@ -341,6 +405,7 @@ const App: React.FC = () => {
           <main className="flex flex-1 flex-col gap-4 overflow-hidden p-4">
             <div
               ref={dropRef}
+              onDragEnter={handleDragEnter}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
