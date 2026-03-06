@@ -44,6 +44,7 @@ type CompressionStatus = "idle" | "compressing" | "done" | "error";
 
 interface ImageFile {
   id: string;
+  filePath: string;
   name: string;
   originalSize: number;
   compressedSize: number | null;
@@ -200,24 +201,80 @@ const App: React.FC = () => {
 
   const handleDragLeave = () => setIsDragOver(false);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files;
-    if (!selected || selected.length === 0) return;
+  const handleFileSelect = async () => {
+    const selectedFiles = await window.electronAPI.openFile();
+    if (!selectedFiles || selectedFiles.length === 0) {
+      return;
+    }
 
-    const newItems: ImageFile[] = Array.from(selected)
-      .filter((file) => file.type.startsWith("image/"))
-      .map((file) => ({
-        id: `${file.name}-${file.size}-${file.lastModified}-${crypto.randomUUID()}`,
-        name: file.name,
-        originalSize: file.size,
+    setFiles((prev) => {
+      const existingPaths = new Set(prev.map((file) => file.filePath));
+      const nextFiles = selectedFiles
+        .filter(({ filePath }) => !existingPaths.has(filePath))
+        .map(({ filePath, originalSize }) => {
+          const fileName = filePath.split(/[/\\]/).pop() ?? filePath;
+          const previewPath = encodeURI(
+            `file:///${filePath.replace(/\\/g, "/")}`,
+          );
+
+          return {
+            id: filePath,
+            filePath,
+            name: fileName,
+            originalSize,
+            compressedSize: null,
+            preview: previewPath,
+            status: "idle" as const,
+            progress: 0,
+          };
+        });
+
+      return [...prev, ...nextFiles];
+    });
+  };
+
+  const handleCompressImages = async () => {
+    if (files.length === 0) {
+      return;
+    }
+    setFiles((prev) =>
+      prev.map((file) => ({
+        ...file,
+        status: "compressing",
+        progress: 50,
         compressedSize: null,
-        preview: URL.createObjectURL(file),
-        status: "idle",
-        progress: 0,
-      }));
+      })),
+    );
 
-    setFiles((prev) => [...prev, ...newItems]);
-    e.target.value = "";
+    try {
+      const results = await window.electronAPI.compressImages(
+        files.map((file) => file.filePath),
+        quality,
+      );
+      const resultMap = new Map(
+        results.map((result) => [result.filePath, result.compressedSize]),
+      );
+
+      setFiles((prev) =>
+        prev.map((file) => ({
+          ...file,
+          status: resultMap.has(file.filePath) ? "done" : "error",
+          progress: resultMap.has(file.filePath) ? 100 : 0,
+          compressedSize: resultMap.get(file.filePath) ?? null,
+        })),
+      );
+      window.electronAPI.setTitle("Compression complete");
+    } catch (error) {
+      console.error("Error compressing images:", error);
+      setFiles((prev) =>
+        prev.map((file) => ({
+          ...file,
+          status: "error",
+          progress: 0,
+        })),
+      );
+      window.electronAPI.setTitle("Compression failed");
+    }
   };
 
   const removeFile = useCallback(
@@ -227,22 +284,19 @@ const App: React.FC = () => {
 
   const clearFiles = () => setFiles([]);
 
-  const { doneFiles, totalOriginal, totalCompressed, overallProgress } =
-    useMemo(() => {
-      const doneFiles = files.filter((f) => f.status === "done");
-      const totalOriginal = files.reduce((s, f) => s + f.originalSize, 0);
-      const totalCompressed = doneFiles.reduce(
-        (s, f) => s + (f.compressedSize ?? 0),
-        0,
-      );
-      const overallProgress =
-        files.length === 0
-          ? 0
-          : Math.round(
-              files.reduce((s, f) => s + f.progress, 0) / files.length,
-            );
-      return { doneFiles, totalOriginal, totalCompressed, overallProgress };
-    }, [files]);
+  const { totalOriginal, totalCompressed, overallProgress } = useMemo(() => {
+    const doneFiles = files.filter((f) => f.status === "done");
+    const totalOriginal = files.reduce((s, f) => s + f.originalSize, 0);
+    const totalCompressed = doneFiles.reduce(
+      (s, f) => s + (f.compressedSize ?? 0),
+      0,
+    );
+    const overallProgress =
+      files.length === 0
+        ? 0
+        : Math.round(files.reduce((s, f) => s + f.progress, 0) / files.length);
+    return { totalOriginal, totalCompressed, overallProgress };
+  }, [files]);
 
   return (
     <TooltipProvider>
@@ -253,14 +307,6 @@ const App: React.FC = () => {
             <span className="text-sm font-semibold tracking-tight">
               ImagePress
             </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {doneFiles.length > 0 && (
-              <Button size="sm" variant="default" className="gap-1.5">
-                <DownloadCloudIcon className="size-3.5" />
-                Export All ({doneFiles.length})
-              </Button>
-            )}
           </div>
         </header>
 
@@ -289,27 +335,16 @@ const App: React.FC = () => {
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
-                  <form>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      className="hidden"
-                      ref={fileInputRef}
-                      id="file-input"
-                      onChange={handleFileSelect}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <FolderOpenIcon className="size-3.5" />
-                      Browse Files
-                    </Button>
-                  </form>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={handleFileSelect}
+                  >
+                    <FolderOpenIcon className="size-3.5" />
+                    Browse Files
+                  </Button>
                 </EmptyContent>
               </Empty>
             </div>
@@ -483,9 +518,7 @@ const App: React.FC = () => {
                 disabled={files.length === 0}
                 size="default"
                 ref={compressButtonRef}
-                onClick={() => {
-                  console.log();
-                }}
+                onClick={handleCompressImages}
               >
                 <ZapIcon className="size-4" />
                 Compress{" "}
