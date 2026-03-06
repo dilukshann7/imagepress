@@ -37,47 +37,90 @@ async function handleCompressImages(
   _event: Electron.IpcMainInvokeEvent,
   filePaths: string[],
   quality: number,
+  outputFormat: string,
+  resizeEnabled: boolean,
+  maxWidth: number,
 ) {
   return Promise.all(
     filePaths.map(async (filePath) => {
-      const compressedBuffer = await compressImage(filePath, quality);
-      await saveCompressedImage(filePath, compressedBuffer);
-      const compressedSize = compressedBuffer.length;
-      return {
+      const buffer = await processImage(
         filePath,
-        compressedSize,
-      };
+        quality,
+        outputFormat,
+        resizeEnabled,
+        maxWidth,
+      );
+      await saveProcessedImage(filePath, buffer, outputFormat);
+      return { filePath, compressedSize: buffer.length };
     }),
   );
 }
 
-async function compressImage(
+function getFormatFromPath(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase().replace(".", "");
+  const map: Record<string, string> = {
+    jpg: "jpeg",
+    jpeg: "jpeg",
+    png: "png",
+    webp: "webp",
+    avif: "avif",
+    gif: "png",
+  };
+  return map[ext] ?? "jpeg";
+}
+
+async function processImage(
   filePath: string,
   quality: number,
+  outputFormat: string,
+  resizeEnabled: boolean,
+  maxWidth: number,
 ): Promise<Buffer> {
   try {
-    const compressedBuffer = await sharp(filePath).jpeg({ quality }).toBuffer();
-    return compressedBuffer;
+    const format =
+      outputFormat === "original" ? getFormatFromPath(filePath) : outputFormat;
+    let pipeline = sharp(filePath);
+
+    if (resizeEnabled) {
+      pipeline = pipeline.resize({ width: maxWidth, withoutEnlargement: true });
+    }
+
+    switch (format) {
+      case "jpeg":
+        return pipeline.jpeg({ quality }).toBuffer();
+      case "png":
+        return pipeline.png({ quality }).toBuffer();
+      case "webp":
+        return pipeline.webp({ quality }).toBuffer();
+      case "avif":
+        return pipeline.avif({ quality }).toBuffer();
+      default:
+        return pipeline.jpeg({ quality }).toBuffer();
+    }
   } catch (error) {
-    console.error("Error compressing image:", error);
+    console.error("Error processing image:", error);
     throw error;
   }
 }
 
-async function saveCompressedImage(
+async function saveProcessedImage(
   filePath: string,
-  compressedBuffer: Buffer,
+  buffer: Buffer,
+  outputFormat: string,
 ): Promise<void> {
   const dir = path.dirname(filePath);
-  const ext = path.extname(filePath);
-  const baseName = path.basename(filePath, ext);
-  const defaultName = `${baseName}-compressed${ext}`;
-  const defaultPath = path.join(dir, defaultName);
+  const origExt = path.extname(filePath);
+  const baseName = path.basename(filePath, origExt);
+  const outExt =
+    outputFormat === "original"
+      ? origExt
+      : `.${outputFormat === "jpeg" ? "jpg" : outputFormat}`;
+  const defaultPath = path.join(dir, `${baseName}-compressed${outExt}`);
 
   try {
-    await fs.writeFile(defaultPath, compressedBuffer);
+    await fs.writeFile(defaultPath, buffer);
   } catch (error) {
-    console.error("Error saving compressed image:", error);
+    console.error("Error saving processed image:", error);
     throw error;
   }
 }

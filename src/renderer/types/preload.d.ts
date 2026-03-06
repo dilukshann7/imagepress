@@ -13,6 +13,9 @@ interface ElectronAPI {
   compressImages: (
     filePaths: string[],
     quality: number,
+    outputFormat: string,
+    resizeEnabled: boolean,
+    maxWidth: number,
   ) => Promise<CompressedImageResult[]>;
   getPathForFile: (file: File) => string;
 }

@@ -320,6 +320,9 @@ const App: React.FC = () => {
       const results = await window.electronAPI.compressImages(
         files.map((file) => file.filePath),
         quality,
+        outputFormat,
+        resizeEnabled,
+        parseInt(maxWidth, 10),
       );
       const resultMap = new Map(
         results.map((result) => [result.filePath, result.compressedSize]),
