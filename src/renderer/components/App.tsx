@@ -300,30 +300,7 @@ const App: React.FC = () => {
       return;
     }
 
-    setFiles((prev) => {
-      const existingPaths = new Set(prev.map((file) => file.filePath));
-      const nextFiles = selectedFiles
-        .filter(({ filePath }) => !existingPaths.has(filePath))
-        .map(({ filePath, originalSize }) => {
-          const fileName = filePath.split(/[/\\]/).pop() ?? filePath;
-          const previewPath = encodeURI(
-            `file:///${filePath.replace(/\\/g, "/")}`,
-          );
-
-          return {
-            id: filePath,
-            filePath,
-            name: fileName,
-            originalSize,
-            compressedSize: null,
-            preview: previewPath,
-            status: "idle" as const,
-            progress: 0,
-          };
-        });
-
-      return [...prev, ...nextFiles];
-    });
+    addFiles(selectedFiles);
   };
 
   const handleCompressImages = async () => {
