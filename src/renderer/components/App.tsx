@@ -1,9 +1,15 @@
-import React, { useState, useRef, useCallback, useMemo, memo, useEffect } from "react";
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  memo,
+  useEffect,
+} from "react";
 import {
   ImageIcon,
   UploadCloudIcon,
   Trash2Icon,
-  DownloadIcon,
   FolderOpenIcon,
   ZapIcon,
   CheckCircle2Icon,
@@ -179,16 +185,6 @@ const FileRow = memo(function FileRow({ file, onRemove }: FileRowProps) {
       </div>
 
       <div className="flex shrink-0 items-center gap-1">
-        {file.status === "done" && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className="size-7">
-                <DownloadIcon className="size-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Download</TooltipContent>
-          </Tooltip>
-        )}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -211,7 +207,6 @@ const App: React.FC = () => {
   const [files, setFiles] = useState<ImageFile[]>([]);
   const [quality, setQuality] = useState(80);
   const [outputFormat, setOutputFormat] = useState("original");
-  const [stripMeta, setStripMeta] = useState(true);
   const [resizeEnabled, setResizeEnabled] = useState(false);
   const [maxWidth, setMaxWidth] = useState("1920");
   const [isDragOver, setIsDragOver] = useState(false);
@@ -538,18 +533,6 @@ const App: React.FC = () => {
                   <span>Smaller file</span>
                   <span>Better quality</span>
                 </div>
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">Strip metadata</span>
-                  <span className="text-xs text-muted-foreground">
-                    Remove EXIF, GPS, etc.
-                  </span>
-                </div>
-                <Switch checked={stripMeta} onCheckedChange={setStripMeta} />
               </div>
 
               <Separator />
