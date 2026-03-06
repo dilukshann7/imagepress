@@ -137,10 +137,6 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
   });
 
-  ipcMain.handle("ping", async () => {
-    return "pong";
-  });
-
   ipcMain.handle("dialog:openFile", handleFileOpen);
   ipcMain.handle("images:compress", handleCompressImages);
 });
