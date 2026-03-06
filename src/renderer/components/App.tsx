@@ -263,7 +263,6 @@ const App: React.FC = () => {
           compressedSize: resultMap.get(file.filePath) ?? null,
         })),
       );
-      window.electronAPI.setTitle("Compression complete");
     } catch (error) {
       console.error("Error compressing images:", error);
       setFiles((prev) =>
@@ -273,7 +272,6 @@ const App: React.FC = () => {
           progress: 0,
         })),
       );
-      window.electronAPI.setTitle("Compression failed");
     }
   };
 

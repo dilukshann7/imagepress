@@ -16,7 +16,6 @@ interface CompressedImageResult {
 }
 
 interface ElectronAPI {
-  setTitle: (title: string) => void;
   openFile: () => Promise<OpenedImageFile[] | undefined>;
   compressImages: (
     filePaths: string[],
@@ -26,7 +25,6 @@ interface ElectronAPI {
 
 declare global {
   interface Window {
-    versions: VersionsApi;
     electronAPI: ElectronAPI;
   }
 }
