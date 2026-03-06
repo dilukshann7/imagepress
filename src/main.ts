@@ -1,11 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  ipcMain,
-  Menu,
-  MenuItemConstructorOptions,
-  dialog,
-} from "electron";
+import { app, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import { stat } from "fs/promises";
 import path from "path";
 import fs from "fs/promises";
@@ -109,28 +102,9 @@ function createMainWindow(): void {
   });
 }
 
-function createAboutWindow(): void {
-  const aboutWindow = new BrowserWindow({
-    width: 400,
-    height: 300,
-    title: "About",
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-    },
-    resizable: false,
-    icon: path.join(__dirname, "../assets/icon.png"),
-    backgroundColor: "#222222",
-  });
-
-  aboutWindow.removeMenu();
-  aboutWindow.loadFile(path.join(__dirname, "../src/about.html"));
-}
-
 app.whenReady().then(() => {
   createMainWindow();
-  const mainMenu = Menu.buildFromTemplate(menu);
-  Menu.setApplicationMenu(mainMenu);
+  Menu.setApplicationMenu(null);
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
@@ -139,40 +113,6 @@ app.whenReady().then(() => {
   ipcMain.handle("dialog:openFile", handleFileOpen);
   ipcMain.handle("images:compress", handleCompressImages);
 });
-
-const menu: MenuItemConstructorOptions[] = [
-  ...(isMac
-    ? [
-        {
-          label: "About",
-          submenu: [{ label: "About ImagePress", click: createAboutWindow }],
-        },
-      ]
-    : []),
-  {
-    role: "fileMenu" as const,
-  },
-  ...(!isMac
-    ? [
-        {
-          label: "Help",
-          submenu: [{ label: "About ImagePress", click: createAboutWindow }],
-        },
-      ]
-    : []),
-  ...(isDev
-    ? [
-        {
-          label: "Developer",
-          submenu: [
-            { role: "reload" as const },
-            { role: "forceReload" as const },
-            { role: "toggleDevTools" as const },
-          ],
-        },
-      ]
-    : []),
-];
 
 app.on("window-all-closed", () => {
   if (!isMac) {
