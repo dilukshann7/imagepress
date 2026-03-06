@@ -52,6 +52,11 @@ interface ImageFile {
   progress: number;
 }
 
+interface SelectedImageFile {
+  filePath: string;
+  originalSize: number;
+}
+
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 B";
   const k = 1024;
@@ -63,6 +68,32 @@ function formatBytes(bytes: number): string {
 function savings(original: number, compressed: number): string {
   const pct = ((original - compressed) / original) * 100;
   return `${pct.toFixed(0)}%`;
+}
+
+function isSupportedImage(fileName: string, mimeType: string): boolean {
+  return (
+    mimeType.startsWith("image/") ||
+    /\.(png|jpe?g|webp|avif|gif)$/i.test(fileName)
+  );
+}
+
+function createImageFile({
+  filePath,
+  originalSize,
+}: SelectedImageFile): ImageFile {
+  const fileName = filePath.split(/[/\\]/).pop() ?? filePath;
+  const previewPath = encodeURI(`file:///${filePath.replace(/\\/g, "/")}`);
+
+  return {
+    id: filePath,
+    filePath,
+    name: fileName,
+    originalSize,
+    compressedSize: null,
+    preview: previewPath,
+    status: "idle",
+    progress: 0,
+  };
 }
 
 const StatusBadge = memo(function StatusBadge({
