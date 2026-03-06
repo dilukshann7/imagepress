@@ -10,7 +10,6 @@ import {
   XCircleIcon,
   FileImageIcon,
   SettingsIcon,
-  DownloadCloudIcon,
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Slider } from "./ui/slider";
@@ -186,7 +185,6 @@ const App: React.FC = () => {
   const [maxWidth, setMaxWidth] = useState("1920");
   const [isDragOver, setIsDragOver] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const compressButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleDrop = (e: React.DragEvent) => {

@@ -9,7 +9,6 @@ import {
 import { stat } from "fs/promises";
 import path from "path";
 import fs from "fs/promises";
-import slash from "slash";
 import dotenv from "dotenv";
 import sharp from "sharp";
 
