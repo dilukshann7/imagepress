@@ -5,6 +5,10 @@ import fs from "fs/promises";
 import dotenv from "dotenv";
 import sharp from "sharp";
 
+if (require("electron-squirrel-startup")) {
+  app.quit();
+}
+
 dotenv.config();
 
 const isDev = process.env.NODE_ENV === "development";
@@ -126,6 +130,10 @@ async function saveProcessedImage(
 }
 
 function createMainWindow(): void {
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, "icon.png")
+    : path.join(__dirname, "../assets/icon.png");
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 900,
@@ -135,7 +143,7 @@ function createMainWindow(): void {
       contextIsolation: true,
     },
     resizable: isDev,
-    icon: path.join(__dirname, "../assets/icon.png"),
+    icon: iconPath,
   });
 
   mainWindow.loadFile(path.join(__dirname, "../src/index.html"));
@@ -146,6 +154,7 @@ function createMainWindow(): void {
 }
 
 app.whenReady().then(() => {
+  app.setAppUserModelId("com.squirrel.imagepress.imagepress");
   createMainWindow();
   Menu.setApplicationMenu(null);
 
