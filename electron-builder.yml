@@ -33,7 +33,7 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: ImagePress
-  installerFilename: ImagePress-Setup.exe
+  artifactName: ImagePress-Setup.exe
 
 mac:
   target:
@@ -53,4 +53,3 @@ linux:
   category: Graphics
   description: A powerful image compression tool built with Electron and React.
   maintainer: Dilukshan Niranjan
-  homepage: https://github.com/dilukshan7/imagepress
