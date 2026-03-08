@@ -150,7 +150,7 @@ function createMainWindow(): void {
 }
 
 app.whenReady().then(() => {
-  app.setAppUserModelId("com.squirrel.imagepress.imagepress");
+  app.setAppUserModelId("com.dilukshan.imagepress");
   createMainWindow();
   Menu.setApplicationMenu(null);
 

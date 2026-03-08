@@ -1,0 +1,56 @@
+appId: com.dilukshan.imagepress
+productName: ImagePress
+copyright: Copyright © 2026 Dilukshan Niranjan
+
+directories:
+  output: release
+
+files:
+  - dist/**/*
+  - src/index.html
+
+asar: true
+asarUnpack:
+  - "**/node_modules/{sharp,@img}/**/*"
+
+extraResources:
+  - from: assets/icon.png
+    to: icon.png
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  installerIcon: assets/icon.ico
+  uninstallerIcon: assets/icon.ico
+  installerHeaderIcon: assets/icon.ico
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: ImagePress
+  installerFilename: ImagePress-Setup.exe
+
+mac:
+  target:
+    - dmg
+    - zip
+  icon: assets/icon.icns
+  category: public.app-category.graphics-and-design
+
+dmg:
+  format: ULFO
+
+linux:
+  target:
+    - deb
+    - rpm
+  icon: assets/icon.png
+  category: Graphics
+  description: A powerful image compression tool built with Electron and React.
+  maintainer: Dilukshan Niranjan
+  homepage: https://github.com/dilukshan7/imagepress
