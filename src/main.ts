@@ -5,10 +5,6 @@ import fs from "fs/promises";
 import dotenv from "dotenv";
 import sharp from "sharp";
 
-if (require("electron-squirrel-startup")) {
-  app.quit();
-}
-
 dotenv.config();
 
 const isDev = process.env.NODE_ENV === "development";
